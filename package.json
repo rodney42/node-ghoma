@@ -1,0 +1,14 @@
+{
+  "name": "ghoma",
+  "version": "0.0.1",
+  "description": "A control server for g-homa wifi plugs",
+  "main": "ghoma.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Frank Klingebiel",
+  "license": "MIT",
+  "dependencies": {
+    "net": "^1.0.2"
+  }
+}

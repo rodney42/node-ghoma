@@ -1,16 +1,23 @@
+A control server for G-Homa Wifi plugs written in [node](http://nodejs.org).
+Enables 
 
-Server for G-Homa Wifi plugs written in [node](http://nodejs.org).
+Installation
+------------
 
-Example
--------
+```bash
+$ npm install ghoma
+```
+
+Usage example
+-------------
 
 ```js
-var ghoma = require('./ghoma.js');
+var ghoma = require('ghoma');
 
-// Uncomment this line to get a detailed log output
+// Uncomment this line to get a detailed console log output
 // ghoma.log=console.log;
 
-// Register a listener for new plugs
+// A new plug was registered.
 ghoma.onNew = function(ghoma) {
   console.log('Registerd    ' + ghoma.remoteAddress+"  "+ghoma.fullMac.toString('hex'));
   // Switch the plug on
@@ -40,6 +47,8 @@ ghoma.startServer(4500);
 Further information
 -------------------
 
-[FHEM Wiki Page](http://www.fhemwiki.de/wiki/G-Homa) (german)
-
-[Producer website](http://www.g-homa.com/index.php/de/)
+The network protocol was deciphered by others - full credits go to them.
+See the [FHEM Wiki Page](http://www.fhemwiki.de/wiki/G-Homa) (german)
+and
+[Full disclosure for gHoma on seclists](http://seclists.org/fulldisclosure/2015/May/45) (german). The hardware producer site can be found
+[here](http://www.g-homa.com/index.php/de/) (german).

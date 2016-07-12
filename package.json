@@ -10,5 +10,10 @@
   "license": "MIT",
   "dependencies": {
     "net": "^1.0.2"
+  },
+  "repository" :
+  {
+    "type" : "git",
+    "url" : "https://github.com/rodney42/node-ghoma.git"
   }
 }

@@ -1,5 +1,6 @@
 A control server for G-Homa Wifi plugs written in [node](http://nodejs.org).
-Enables 
+
+Enables the use of the wifi plugs without the need to allow them to call home. The usefulness of this library is limited, as long as you don't use it together with a framework like [express.js](https://expressjs.com/).
 
 Installation
 ------------
@@ -50,5 +51,7 @@ Further information
 The network protocol was deciphered by others - full credits go to them.
 See the [FHEM Wiki Page](http://www.fhemwiki.de/wiki/G-Homa) (german)
 and
-[Full disclosure for gHoma on seclists](http://seclists.org/fulldisclosure/2015/May/45) (german). The hardware producer site can be found
-[here](http://www.g-homa.com/index.php/de/) (german).
+[Full disclosure for gHoma on seclists](http://seclists.org/fulldisclosure/2015/May/45) (german).
+
+The hardware producer site can be found
+[here](http://www.g-homa.com/index.php/de/) (also in german).

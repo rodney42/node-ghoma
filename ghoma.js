@@ -30,7 +30,7 @@ var server = net.createServer(function(socket) {
   socket.setNoDelay(true);
 
   // Used as receive buffer
-  var buffer = new Buffer(0, 'binary');
+  var buffer = new Buffer(0);
 
   // Initialize ghoma object
   var ghoma = {

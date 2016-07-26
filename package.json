@@ -1,6 +1,6 @@
 {
   "name": "ghoma",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A control server for g-homa wifi plugs",
   "main": "ghoma.js",
   "scripts": {

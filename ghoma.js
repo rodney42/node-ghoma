@@ -60,6 +60,7 @@ var server = net.createServer(function(socket) {
       while( msg ) {
         if( msg.command.equals( CMD_INIT1REPLY ) ) {
           ghoma.shortMac = msg.payload.slice(6,9);
+          ghoma.id = ghoma.shortMac.toString('hex');
           send('INIT2', BuildMsg(INIT2));
         } else if( msg.command.equals( CMD_INIT2REPLY ) ) {
           log('HANDLE', 'INIT2 RPLY');
@@ -106,7 +107,7 @@ var server = net.createServer(function(socket) {
           }
           send('HEARTBEAT RPLY', BuildMsg(HEARTBEATREPLY));
         } else {
-          log('HNADLE','Unsupported command '+msg.command.toString('hex'), msg.payload );
+          log('HANDLE','Unsupported command '+msg.command.toString('hex'), msg.payload );
         }
         msg=nextMsg();
       }
@@ -225,6 +226,21 @@ var server = net.createServer(function(socket) {
  */
 exports.forEach = function(callback) {
   gHomaRegistry.forEach(callback);
+}
+
+/**
+ * Get a ghoma plug by ident
+ *
+ * @param id The ident. The ident is compared to the hex representation of the short mac.
+ */
+exports.get = function(id) {
+  var found;
+  gHomaRegistry.forEach( function(ghoma) {
+    if( ghoma.id==id) {
+      found = ghoma;
+    }
+  });
+  return found;
 }
 
 /**

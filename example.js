@@ -4,27 +4,34 @@ var ghoma = require('./ghoma.js');
 // ghoma.log=console.log;
 
 // Register a listener for new plugs
-ghoma.onNew = function(ghoma) {
-  console.log('Registerd    ' + ghoma.remoteAddress+"  "+ghoma.fullMac.toString('hex'));
+ghoma.onNew = function(plug) {
+  console.log('Registerd    ' + plug.remoteAddress+"  "+plug.fullMac.toString('hex'));
   // Switch the plug on
-  ghoma.on();
+  plug.on();
 }
 
 // Called when the plug switches on or off
-ghoma.onStatusChange = function(ghoma) {
-  console.log('New state of ' + ghoma.remoteAddress+' is '+ghoma.state+' triggered '+ghoma.triggered);
+ghoma.onStatusChange = function(plug) {
+  console.log('New state of ' + plug.remoteAddress+' is '+plug.state+' triggered '+plug.triggered);
 }
 
 // Called when the plug connection to the server was lost
-ghoma.onClose = function(ghoma) {
-  console.log('Closed       ' + ghoma.remoteAddress);
+ghoma.onClose = function(plug) {
+  console.log('Closed       ' + plug.remoteAddress);
 }
 
-/* Enable to listen for heartbeats of the plugs
-ghoma.onHeartbeat = function(ghoma) {
-  console.log('Heartbeat ' + ghoma.remoteAddress);
+// Listen for heartbeats of the plugs
+ghoma.onHeartbeat = function(plug) {
+  console.log('Heartbeat ' + plug.remoteAddress);
 }
-*/
 
 // Start a listening server on this port
-ghoma.startServer(4500);
+ghoma.startServer(4196);
+
+/* Example:
+ * Iterate through each found plug
+ *
+ghoma.forEach(function(plug,idx) {
+  console.log(idx+' '+plug.id+' '+plug.remoteAddress);
+});
+*/

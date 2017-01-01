@@ -48,6 +48,7 @@ ghoma.startServer(4196);
 ```
 
 The next example shows the node-ghoma library in combination with the express framework.
+
 ```js
 /**
  * Usage example for the ghoma control server library together with a minimal express.js application.
@@ -62,6 +63,7 @@ The next example shows the node-ghoma library in combination with the express fr
  * http://localhost:3000/alloff     Switch all plugs off.
  * http://localhost:3000/on/ID      Switch a plug on. Replace ID with the short mac, that can be retrieved by the 'list' call.
  * http://localhost:3000/off/ID     Switch a plug off. Replace ID with the short mac, that can be retrieved by the 'list' call.
+ * http://localhost:3000/state/ID   Current state of a plug. Replace ID with the short mac, that can be retrieved by the 'list' call.
  */
 var ghoma = require('./ghoma.js');
 var express = require('express');
@@ -82,7 +84,7 @@ app.get('/list', function (req, res) {
     });
   });
   res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(plugs));
+  res.send(JSON.stringify(plugs));
 });
 
 /**
@@ -106,6 +108,19 @@ app.get('/off/:id', function (req, res) {
     if ( plug ) {
       plug.off();
       res.sendStatus(200);
+    } else {
+      res.sendStatus(404);
+    }
+});
+
+/**
+ * Retrieve the current state of a plug by id.
+ */
+app.get('/state/:id', function (req, res) {
+    var plug = ghoma.get(req.params.id);
+    if ( plug ) {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify(plug));
     } else {
       res.sendStatus(404);
     }
@@ -139,6 +154,7 @@ ghoma.startServer(4196);
 app.listen(3000, function () {
   console.log('ghoma express example app start listening on port 3000 for http requests.');
 });
+
 ```
 
 
@@ -148,35 +164,36 @@ API description
 ### Notifications
 These notifications are triggered. See also example above.
 
-#### onNew(plug)
+#### onNew(ghoma)
 Called when a new plug is registered with the control server.
 
-#### onStatusChange(plug)
+#### onStatusChange(ghoma)
 Called if the plug was switched on or off.
 
-#### onClose(plug)
+#### onClose(ghoma)
 Called if the connection to the plug was lost.
 
-#### onHeartbeat(plug)
-Called when a heartbeat event from the plug occured.
+#### onHeartbeat(ghoma)
+Called when a heartbeat event from the plug occurred.
+
 
 ### Methods
 Methods provided by the module.
 
 #### forEach(callback)
-Iterate through each registered plug.
+Iterate through each registered ghome plug object.
 
 #### get(id)
 Helper method to get a plug by id. The id is the hex representation of the short mac of the plug. It can be used to unique identify the plug.
 
-### The plug object
+### The ghoma object
 
-The plug object is used as callback argument for each notification and as a result of method calls.
+The ghoma object is used as callback argument for each notification and as a result of method calls.
 
 ```js
 {
   "state": "on",          // 'on' or 'off'
-  "triggered": "local",   // 'local' or 'remote'
+  "triggered": "local",   // 'local' or 'remote'. 'local' if the plug button was used.
   "remoteAddress": "::ffff:192.168.12.136",
   "remotePort": 12635,
   "initalized": "2016-07-24T20:57:00.525Z",  // First seen time

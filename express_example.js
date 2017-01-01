@@ -11,6 +11,7 @@
  * http://localhost:3000/alloff     Switch all plugs off.
  * http://localhost:3000/on/ID      Switch a plug on. Replace ID with the short mac, that can be retrieved by the 'list' call.
  * http://localhost:3000/off/ID     Switch a plug off. Replace ID with the short mac, that can be retrieved by the 'list' call.
+ * http://localhost:3000/state/ID   Current state of a plug. Replace ID with the short mac, that can be retrieved by the 'list' call.
  */
 var ghoma = require('./ghoma.js');
 var express = require('express');
@@ -31,7 +32,7 @@ app.get('/list', function (req, res) {
     });
   });
   res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(plugs));
+  res.send(JSON.stringify(plugs));
 });
 
 /**
@@ -55,6 +56,19 @@ app.get('/off/:id', function (req, res) {
     if ( plug ) {
       plug.off();
       res.sendStatus(200);
+    } else {
+      res.sendStatus(404);
+    }
+});
+
+/**
+ * Retrieve the current state of a plug by id.
+ */
+app.get('/state/:id', function (req, res) {
+    var plug = ghoma.get(req.params.id);
+    if ( plug ) {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(JSON.stringify(plug));
     } else {
       res.sendStatus(404);
     }

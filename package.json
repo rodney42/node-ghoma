@@ -1,7 +1,7 @@
 {
   "name": "ghoma",
-  "version": "0.0.4",
-  "description": "A control server for g-homa wifi plugs",
+  "version": "1.0.0",
+  "description": "A control server for g-homa wifi plugs.",
   "main": "ghoma.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

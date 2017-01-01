@@ -42,8 +42,6 @@ var server = net.createServer(function(socket) {
     on : switchOn,
     off : switchOff
   }
-  // And remember it
-  gHomaRegistry.push(ghoma);
 
   // Send init 1 msg
   var init1Msg = Buffer.concat([
@@ -71,10 +69,24 @@ var server = net.createServer(function(socket) {
             // Fullmac and shotmac matches -> first reply
             ghoma.fullMac = fullMac;
           } else {
-            // Fullmac and shotmac does not match -> second reply -> notify listener
+            // Fullmac and shotmac does not match -> second reply -> remember it.
+            var idx = indexOfById(ghoma.id);
+            if( idx != -1 ) {
+              // A reconnect of a existing. Replace existing.
+              if( exports.onClose ) {
+                exports.onClose(gHomaRegistry[idx]);
+              }
+              gHomaRegistry[idx] = ghoma;
+            } else {
+              // a new never seen plug
+              gHomaRegistry.push(ghoma);
+            }
+
+            // notify listener about the new plug
             if( exports.onNew ) {
               exports.onNew(ghoma);
             }
+
           }
         } else if( msg.command.equals( CMD_STATUS ) ) {
           log('HANDLE', 'STATUS', msg.payload);
@@ -219,6 +231,16 @@ var server = net.createServer(function(socket) {
 
 });
 
+indexOfById = function(id) {
+  var fid = -1;
+  gHomaRegistry.forEach( function(ghoma,idx) {
+    if( ghoma.id==id) {
+      fid = idx;
+    }
+  });
+  return fid;
+}
+
 /**
  * Iterator method, to go to each registered plug.
  *
@@ -234,13 +256,8 @@ exports.forEach = function(callback) {
  * @param id The ident. The ident is compared to the hex representation of the short mac.
  */
 exports.get = function(id) {
-  var found;
-  gHomaRegistry.forEach( function(ghoma) {
-    if( ghoma.id==id) {
-      found = ghoma;
-    }
-  });
-  return found;
+  var idx = indexOfById(id);
+  return (idx!=-1 ? gHomaRegistry[idx] : null);
 }
 
 /**

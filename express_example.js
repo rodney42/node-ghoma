@@ -29,6 +29,8 @@ app.get('/list', function (req, res) {
     plugs.push( {
       id : plug.id,
       state : plug.state,
+      triggered : plug.triggered,
+      remoteAddress : plug.remoteAddress
     });
   });
   res.setHeader('Content-Type', 'application/json');

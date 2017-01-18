@@ -1,6 +1,6 @@
 {
   "name": "ghoma",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A control server for g-homa wifi plugs.",
   "main": "ghoma.js",
   "scripts": {
@@ -8,11 +8,7 @@
   },
   "author": "rodney42",
   "license": "MIT",
-  "dependencies": {
-    "net": "^1.0.2"
-  },
-  "repository" :
-  {
+  "repository" : {
     "type" : "git",
     "url" : "https://github.com/rodney42/node-ghoma.git"
   }

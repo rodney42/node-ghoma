@@ -18,8 +18,8 @@ var CMD_INIT2REPLY = new Buffer([0x07]);
 var CMD_HEARTBEAT = new Buffer([0x04]);
 var CMD_STATUS = new Buffer([0x90]);
 
-var msg_padding ='           ';
-var action_padding ='      ';
+var msg_padding ='             ';
+var action_padding ='         ';
 
 var gHomaRegistry = [];
 
@@ -73,12 +73,14 @@ var server = net.createServer(function(socket) {
             var idx = indexOfById(ghoma.id);
             if( idx != -1 ) {
               // A reconnect of a existing. Replace existing.
+              log('INFO','REREG' );
               if( exports.onClose ) {
                 exports.onClose(gHomaRegistry[idx]);
               }
               gHomaRegistry[idx] = ghoma;
             } else {
               // a new never seen plug
+              log('INFO','REG');
               gHomaRegistry.push(ghoma);
             }
 
@@ -119,7 +121,7 @@ var server = net.createServer(function(socket) {
           }
           send('HEARTBEAT RPLY', BuildMsg(HEARTBEATREPLY));
         } else {
-          log('HANDLE','Unsupported command '+msg.command.toString('hex'), msg.payload );
+          log('HANDLE','UNSUP CMD', msg.command );
         }
         msg=nextMsg();
       }
@@ -132,11 +134,15 @@ var server = net.createServer(function(socket) {
       exports.onClose(ghoma);
     }
     var idx = gHomaRegistry.indexOf(ghoma);
-    gHomaRegistry.splice(idx,1);
+    if( idx!=-1 ) {
+      gHomaRegistry.splice(idx,1);
+    } else {
+      log('WARN','CLOSENOREG');
+    }
   });
 
   socket.on('error', function(err) {
-    log('SCKT ERR',err);
+    log('SCK ERR',err);
   });
 
   // Send msg via socket

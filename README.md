@@ -1,6 +1,8 @@
 A control server for G-Homa Wifi plugs written in [node](http://nodejs.org).
 
-Enables the use of the wifi plugs without the need to allow them to call home. The usefulness of this library is limited, as long as you don't use it together with a framework like [express.js](https://expressjs.com/).
+This library enables the use of the wifi plugs without the need to allow them to call home.
+
+This library is intended to be used as part of a home automatisation solution. For example, it can be used together with a framework like [express.js](https://expressjs.com/) to switch the plugs on or off by simple http calls.
 
 Installation
 ------------
@@ -47,115 +49,7 @@ ghoma.onHeartbeat = function(ghoma) {
 ghoma.startServer(4196);
 ```
 
-The next example shows the node-ghoma library in combination with the express framework.
-
-```js
-/**
- * Usage example for the ghoma control server library together with a minimal express.js application.
- *
- * You have to 'npm install express' before starting this example by 'node express_example.js'.
- * A ghoma control server is started on port 4196 and a http server is started on port 3000.
- *
- * Now you can open your browser with these urls:
- *
- * http://localhost:3000/list       Displays a list of all registered ghoma wifi plugs.
- * http://localhost:3000/allon      Switch all plugs on.
- * http://localhost:3000/alloff     Switch all plugs off.
- * http://localhost:3000/on/ID      Switch a plug on. Replace ID with the short mac, that can be retrieved by the 'list' call.
- * http://localhost:3000/off/ID     Switch a plug off. Replace ID with the short mac, that can be retrieved by the 'list' call.
- * http://localhost:3000/state/ID   Current state of a plug. Replace ID with the short mac, that can be retrieved by the 'list' call.
- */
-var ghoma = require('./ghoma.js');
-var express = require('express');
-var app = express();
-
-// Uncomment this line to get a detailed log output
-// ghoma.log=console.log;
-
-/**
- * List all registered plugs.
- */
-app.get('/list', function (req, res) {
-  var plugs = [];
-  ghoma.forEach(function(plug,idx) {
-    plugs.push( {
-      id : plug.id,
-      state : plug.state,
-    });
-  });
-  res.setHeader('Content-Type', 'application/json');
-  res.send(JSON.stringify(plugs));
-});
-
-/**
- * Switch a plug on by id
- */
-app.get('/on/:id', function (req, res) {
-    var plug = ghoma.get(req.params.id);
-    if ( plug ) {
-      plug.on();
-      res.sendStatus(200);
-    } else {
-      res.sendStatus(404);
-    }
-});
-
-/**
- * Switch a plug off by id
- */
-app.get('/off/:id', function (req, res) {
-    var plug = ghoma.get(req.params.id);
-    if ( plug ) {
-      plug.off();
-      res.sendStatus(200);
-    } else {
-      res.sendStatus(404);
-    }
-});
-
-/**
- * Retrieve the current state of a plug by id.
- */
-app.get('/state/:id', function (req, res) {
-    var plug = ghoma.get(req.params.id);
-    if ( plug ) {
-      res.setHeader('Content-Type', 'application/json');
-      res.send(JSON.stringify(plug));
-    } else {
-      res.sendStatus(404);
-    }
-});
-
-/**
- * Switch all registered plugs on
- */
-app.get('/allon', function (req, res) {
-  ghoma.forEach(function(plug,idx) { plug.on(); });
-  res.sendStatus(200);
-});
-
-/**
- * Switch all registered plugs off
- */
-app.get('/alloff', function (req, res) {
-  ghoma.forEach(function(plug,idx) { plug.off(); });
-  res.sendStatus(200);
-});
-
-// Register a listener for new plugs, this is only for a log output
-ghoma.onNew = function(plug) {
-  console.log('Registerd plug from ' + plug.remoteAddress+" with id "+plug.id);
-}
-
-// Start the ghoma control server listening server on this port
-ghoma.startServer(4196);
-
-// Start the express http server listening on port 3000
-app.listen(3000, function () {
-  console.log('ghoma express example app start listening on port 3000 for http requests.');
-});
-
-```
+A more comprehensive example shows the node-ghoma library in combination with the express framework. See [express_example.js](https://github.com/rodney42/node-ghoma/blob/master/express_example.js) in the git repository.
 
 
 API description

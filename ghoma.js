@@ -9,6 +9,7 @@ var PREFIX = new Buffer([0x5A,0xA5]);
 var POSTFIX = new Buffer([0x5B,0xB5]);
 
 var INIT1A  = new Buffer([0x02,0x05,0x0D,0x07,0x05,0x07,0x12]);
+//var INIT1A  = new Buffer([0x02,0x0f,0x04,0x08,0x06,0x0f,0x11]);
 var INIT1B  = new Buffer([0x02]);
 var INIT2   = new Buffer([0x05,0x01])
 var HEARTBEATREPLY  = new Buffer([0x06]);
@@ -59,6 +60,8 @@ var server = net.createServer(function(socket) {
         if( msg.command.equals( CMD_INIT1REPLY ) ) {
           ghoma.shortMac = msg.payload.slice(6,9);
           ghoma.id = ghoma.shortMac.toString('hex');
+          // Remember the trigger code - used for on/off.
+          ghoma.triggercode = msg.payload.slice(4,6);
           send('INIT2', BuildMsg(INIT2));
         } else if( msg.command.equals( CMD_INIT2REPLY ) ) {
           log('HANDLE', 'INIT2 RPLY');
@@ -155,7 +158,9 @@ var server = net.createServer(function(socket) {
   function switchOn(){
     var onMsg = BuildMsg(
       Buffer.concat([
-        new Buffer([0x10,0x01,0x01,0x0a,0xe0,0x32,0x23]),
+        //new Buffer([0x10,0x01,0x01,0x0a,0xe0,0x32,0x23]),
+        new Buffer([0x10,0x01,0x01,0x0a,0xe0]),
+        ghoma.triggercode,
         ghoma.shortMac,
         new Buffer([0xff,0xfe,0x00,0x00,0x10,0x11,0x00,0x00,0x01,0x00,0x00,0x00,0xff])
       ])
@@ -167,7 +172,9 @@ var server = net.createServer(function(socket) {
   function switchOff(){
     var offMsg =BuildMsg(
       Buffer.concat([
-        new Buffer([0x10,0x01,0x01,0x0a,0xe0,0x32,0x23]),
+        //new Buffer([0x10,0x01,0x01,0x0a,0xe0,0x32,0x23]),
+        new Buffer([0x10,0x01,0x01,0x0a,0xe0]),
+        ghoma.triggercode,
         ghoma.shortMac,
         new Buffer([0xff,0xfe,0x00,0x00,0x10,0x11,0x00,0x00,0x01,0x00,0x00,0x00,0x00])
       ])

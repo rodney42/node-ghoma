@@ -1,7 +1,7 @@
 /**
  * Usage example for the ghoma control server library together with a minimal express.js application.
  *
- * You have to 'npm install express' before starting this example by 'node express_example.js'.
+ * You have to run 'npm install express' before starting this example by 'node express_example.js'.
  * A ghoma control server is started on port 4196 and a http server is started on port 3000.
  *
  * Now you can open your browser with these urls:
@@ -18,22 +18,18 @@ var express = require('express');
 var app = express();
 
 // Uncomment this line to get a detailed log output
-// ghoma.log=console.log;
+//ghoma.log=console.log;
+
+var httpPort = 3000;    // Express http listening port
+var ghomaPort = 4196;   // G-Homa default port
 
 /**
  * List all registered plugs.
  */
 app.get('/list', function (req, res) {
-  var plugs = [];
-  ghoma.forEach(function(plug,idx) {
-    plugs.push( {
-      id : plug.id,
-      state : plug.state,
-      triggered : plug.triggered,
-      remoteAddress : plug.remoteAddress
-    });
-  });
   res.setHeader('Content-Type', 'application/json');
+  var plugs = [];
+  ghoma.forEach(function(plug) { plugs.push(plug); });
   res.send(JSON.stringify(plugs));
 });
 
@@ -98,9 +94,9 @@ ghoma.onNew = function(plug) {
 }
 
 // Start the ghoma control server listening server on this port
-ghoma.startServer(4196);
+ghoma.startServer(ghomaPort);
 
-// Start the express http server listening on port 3000
-app.listen(3000, function () {
-  console.log('ghoma express example app start listening on port 3000 for http requests.');
+// Start the express http server listening
+app.listen(httpPort, function () {
+  console.log('ghoma express example app start listening on port '+httpPort+' for http requests.');
 });

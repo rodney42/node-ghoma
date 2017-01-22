@@ -5,8 +5,8 @@ var ghoma = require('./ghoma.js');
 
 // Register a listener for new plugs
 ghoma.onNew = function(plug) {
-  console.log('Registerd    ' + plug.remoteAddress+"  "+plug.fullMac.toString('hex'));
-  // Switch the plug on
+  console.log('Registerd    ' + plug.remoteAddress+" "+plug.id);
+  // For this example switch the plug on in the moment it is registered.
   plug.on();
 }
 
@@ -17,7 +17,7 @@ ghoma.onStatusChange = function(plug) {
 
 // Called when the plug connection to the server was lost
 ghoma.onClose = function(plug) {
-  console.log('Closed       ' + plug.remoteAddress);
+  console.log('Closed ' + plug.remoteAddress);
 }
 
 // Listen for heartbeats of the plugs

@@ -26,10 +26,8 @@ var action_padding ='         ';
 
 // Registry for nodes
 var gHomaRegistry = [];
-
 // Timeout to kick the nodes that have not send a heartbeat in some time
 var timeout = 60000*5; // 5 Minutes
-// The interval timer
 
 var server = net.createServer(function(socket) {
   log('','CONNECTED');
@@ -48,6 +46,7 @@ var server = net.createServer(function(socket) {
     remotePort : socket.remotePort,
     initalized : new Date(),
     lastheartbeat : new Date(),
+    reregistered : 0,
     on : switchOn,
     off : switchOff,
     socket : socket
@@ -89,6 +88,7 @@ var server = net.createServer(function(socket) {
               if( exports.onClose ) {
                 exports.onClose(gHomaRegistry[idx]);
               }
+              ghoma.reregistered = gHomaRegistry[idx].reregistered + 1;
               gHomaRegistry[idx] = ghoma;
             } else {
               // a new never seen plug
@@ -287,6 +287,7 @@ filterPlug = function(plug) {
     remotePort : plug.remotePort,
     on : plug.on,
     off : plug.off,
+    reregistered : plug.reregistered,
     heartbeat: plug.lastheartbeat
   }
 }

@@ -2,7 +2,7 @@ A control server for G-Homa wifi plugs written in [node](http://nodejs.org).
 
 This library enables the use of the wifi plugs without the need to allow them to call home.
 
-This library is intended to be used as part of a home automatisation solution. For example, it can be used together with a framework like [express.js](https://expressjs.com/) to switch the plugs on or off by simple http calls.
+This library is intended to be used as part of a home automatization solution. For example, it can be used together with a framework like [express.js](https://expressjs.com/) to switch the plugs on or off by simple http calls.
 
 Installation
 ------------
@@ -102,7 +102,8 @@ The plug object is used as callback argument for each notification and as a resu
   "initalized": "2017-01-22T20:59:23.565Z", // Time the plug has registered with the control server
   "remoteAddress": "::ffff:192.168.1.136", // The address of the plug
   "remotePort": 14283, // The remote port
-  "heartbeat": "2017-01-22T21:00:20.893Z"  // Time of the last heartbeat call from the plug
+  "heartbeat": "2017-01-22T21:00:20.893Z",  // Time of the last heartbeat call from the plug
+  "reregistered" : 2 // Number of re registrations of the plug. May be a indicator for the connection stability
 }
 ```
 
@@ -110,7 +111,12 @@ G-Homa installation
 -------------------
 
 With firmware version <=1.0.06 you can use the embedded web server to adjust the control server address. See the fhem wiki page for instructions.
-With newer firmware version, this easy way to configure the plug is disabled. The only known way to run your own control server is to setup your own DNS and DHCP service. Then the DNS entry for 'plug.g-homa.com' must point to your own server and you are forced to use '4196' as listening port.
+With newer firmware version, this easy way to configure the plug is disabled.
+
+One way to run your own control server is to setup your own DNS and DHCP service. Then the DNS entry for 'plug.g-homa.com' must point to your own server and you are forced to use '4196' as listening port.
+
+Another way that may work for you is to use this node script to change the control server. See [config.js](https://github.com/rodney42/node-ghoma/blob/master/config.js).
+
 
 Further information
 -------------------

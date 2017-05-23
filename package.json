@@ -1,12 +1,13 @@
 {
   "name": "ghoma",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A control server for g-homa wifi plugs.",
   "main": "ghoma.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "rodney42",
+  "engines" : { "node" : ">=1.5" },
   "license": "MIT",
   "repository" : {
     "type" : "git",

@@ -48,6 +48,18 @@ ghoma.onHeartbeat = function(plug) {
 ghoma.startServer(4196);
 ```
 
+Usage example to configure a plug to a custom server (or restore defaults) from code
+```js
+config.configure(gHomaPlugAddress, controlServer, controlPort, function (err) {
+    console.log(err ? 'Error: ' + err : 'Success');
+} /*, console.log to enabled debug log*/);
+
+
+//Restore default config of the plug
+config.restore(gHomaPlugAddress, function (err) {
+    console.log(err ? 'Error: ' + err : 'Success');
+}, console.log);
+```
 
 A more comprehensive example shows the node-ghoma library in combination with the express framework. See [express_example.js](https://github.com/rodney42/node-ghoma/blob/master/express_example.js) in the git repository.
 

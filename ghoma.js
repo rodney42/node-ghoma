@@ -110,8 +110,10 @@ var server = net.createServer(function(socket) {
             newstate = 'on'
           } else if( msg.payload[msg.payload.length-1] == 0x00 ) {
             newstate = 'off'
+          } else {
+            log('HANDLE', 'STATUS', 'Status unknown: ' +  msg.payload[msg.payload.length-1]);
           }
-          if( newstate!=ghoma.state ) {
+          if( newstate!=ghoma.state && newstate != 'unknown') {
             ghoma.prevstate = ghoma.state;
             ghoma.state = newstate;
             ghoma.statechanged = new Date();

@@ -280,7 +280,7 @@ filterPlug = function(plug) {
     id : plug.id,
     state : plug.state,
     statechanged: plug.statechanged,
-    tiggered: plug.triggered,
+    triggered: plug.triggered,
     prevstate : plug.prevstate,
     initalized : plug.initalized,
     remoteAddress : plug.remoteAddress,

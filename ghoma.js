@@ -169,7 +169,6 @@ var server = net.createServer(function(socket) {
   function switchOn(){
     var onMsg = BuildMsg(
       Buffer.concat([
-        //new Buffer([0x10,0x01,0x01,0x0a,0xe0,0x32,0x23]),
         new Buffer([0x10,0x01,0x01,0x0a,0xe0]),
         ghoma.triggercode,
         ghoma.shortMac,
@@ -183,7 +182,6 @@ var server = net.createServer(function(socket) {
   function switchOff(){
     var offMsg =BuildMsg(
       Buffer.concat([
-        //new Buffer([0x10,0x01,0x01,0x0a,0xe0,0x32,0x23]),
         new Buffer([0x10,0x01,0x01,0x0a,0xe0]),
         ghoma.triggercode,
         ghoma.shortMac,

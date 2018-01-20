@@ -79,8 +79,8 @@ app.get('/info/:id', function (req, res) {
 app.get('/state/:id', function (req, res) {
     var plug = ghoma.get(req.params.id);
     if ( plug ) {
-      res.setHeader('Content-Type', 'application/json');
-      res.send(JSON.stringify(plug.state));
+      res.setHeader('Content-Type', 'text/plain');
+      res.send(plug.state);
     } else {
       res.sendStatus(404);
     }

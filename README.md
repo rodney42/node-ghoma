@@ -109,7 +109,7 @@ The plug object is used as callback argument for each notification and as a resu
   "id": "53ae11", // Unique ID of the plug. These are the last 3 bytes from the MAC address.
   "state": "on",  // Current state. May be 'on','off' or 'unknown'
   "statechanged": "2017-01-22T21:00:19.733Z", // Time of the last state change
-  "tiggered": "local",  // local: Triggered by switch on the plug. remote: Triggered by control server
+  "triggered": "local",  // local: Triggered by switch on the plug. remote: Triggered by control server
   "prevstate": "off",   // The previous state. May be 'unkown', if the plug has no state send until now
   "initalized": "2017-01-22T20:59:23.565Z", // Time the plug has registered with the control server
   "remoteAddress": "::ffff:192.168.1.136", // The address of the plug
@@ -128,6 +128,38 @@ With newer firmware version, this easy way to configure the plug is disabled.
 One way to run your own control server is to setup your own DNS and DHCP service. Then the DNS entry for 'plug.g-homa.com' must point to your own server and you are forced to use '4196' as listening port.
 
 Another way that may work for you is to use this node script to change the control server. See [config.js](https://github.com/rodney42/node-ghoma/blob/master/config.js).
+
+Note: If you re-configure the plug to use the new control server, the android or ios app won't work any more.  
+
+Change log
+----------
+* Version 1.0.7 (thx to msteiger)
+  - Typo fix: t(r)iggered. This may break current listeners that use this property.
+  - Enhancement : express example return a plain state endpoint. The info endpoint returns all informations.
+  - Fix: State unknown is not set, if the received command can not be processed.
+
+* Version 1.0.6 (thx to jaumard)
+  - The config.js can be used from another module.
+
+* Version 1.0.5
+  - Node.js minimum set to 1.5
+
+* Version 1.0.4
+  - Added reregistered property as count how often the node registered again with the control server.
+
+* Version 1.0.3
+  - Configuration tool config.js added.
+
+* Version 1.0.2
+  - Support for EMW302WFO IP44 added.
+  - Filtered plug object is returned.
+
+* Version 1.0.1
+  - Enahancement: Logs, express example.
+  - Removed not needed net dependency.
+
+* Version 1.0.0
+  - Fix: Handling of plugs that are reregistered.
 
 
 Further information

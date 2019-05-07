@@ -5,15 +5,21 @@ var ghoma = require('./ghoma.js');
 
 // Register a listener for new plugs
 ghoma.onNew = function(plug) {
-  console.log('Registerd    ' + plug.remoteAddress+" "+plug.id);
+  console.log('Registerd    '+plug.remoteAddress+" "+plug.id);
   // For this example switch the plug on in the moment it is registered.
   plug.on();
 }
 
 // Called when the plug switches on or off
 ghoma.onStatusChange = function(plug) {
-  console.log('New state of ' + plug.remoteAddress+' is '+plug.state+' triggered '+plug.triggered);
+  console.log('New state of '+plug.remoteAddress+' is '+plug.state+' triggered '+plug.triggered);
 }
+
+// Called when a enery measurement value was reported
+ghoma.onMeasurement = function(plug, property) {
+  console.log('Measured ' +property+' at '+plug.remoteAddress+'. Value is '+plug.energy[property].value);
+}
+
 
 // Called when the plug connection to the server was lost
 ghoma.onClose = function(plug) {

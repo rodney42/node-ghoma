@@ -21,6 +21,8 @@ var CMD_INIT2REPLY = new Buffer([0x07]);
 var CMD_HEARTBEAT = new Buffer([0x04]);
 var CMD_STATUS = new Buffer([0x90]);
 
+var CMD_MEASURE = new Buffer([0xff,0xfe,0x01,0x81,0x39,0x00,0x00,0x01]);
+
 var msg_padding ='             ';
 var action_padding ='         ';
 
@@ -29,6 +31,23 @@ var gHomaRegistry = [];
 // Timeout to kick the nodes that have not send a heartbeat in some time
 var timeout = 60000*5; // 5 Minutes
 
+const ENERGY_TYPES = [
+  { name: "power",     type: 1 },
+  { name: "energy",    type: 2 },
+  { name: "voltage",   type: 3 },
+  { name: "current",   type: 4 },
+  { name: "frequency", type: 5 },
+  { name: "maxpower",  type: 7 },
+  { name: "cosphi",    type: 8 }
+]
+const resolveEnergyTypeName = function(type) {
+  for( i=0; i<ENERGY_TYPES.length; i++ ) {
+    if(ENERGY_TYPES[i].type==type) {
+      return ENERGY_TYPES[i].name;
+    }
+  };
+  return 'unknowntype_type_'+type;
+}
 var server = net.createServer(function(socket) {
   log('','CONNECTED');
 
@@ -49,7 +68,8 @@ var server = net.createServer(function(socket) {
     reregistered : 0,
     on : switchOn,
     off : switchOff,
-    socket : socket
+    socket : socket,
+    firmware : '0.0.0'
   }
 
   // Send init 1 msg
@@ -61,18 +81,19 @@ var server = net.createServer(function(socket) {
 
   // Add a 'data' event handler to this instance of socket
   socket.on('data', function(data) {
-      log('RECV', 'DATA', data);
+      //log('RECV', 'DATA', data);
       buffer = Buffer.concat([buffer, data]);
       var msg=nextMsg();
       while( msg ) {
         if( msg.command.equals( CMD_INIT1REPLY ) ) {
+          log('HANDLE', 'INIT1 RPLY', msg.payload);
           ghoma.shortMac = msg.payload.slice(6,9);
           ghoma.id = ghoma.shortMac.toString('hex');
           // Remember the trigger code - used for on/off.
           ghoma.triggercode = msg.payload.slice(4,6);
           send('INIT2', BuildMsg(INIT2));
         } else if( msg.command.equals( CMD_INIT2REPLY ) ) {
-          log('HANDLE', 'INIT2 RPLY');
+          log('HANDLE', 'INIT2 RPLY', msg.payload);
           // Init2 reply comes 2 times - the first has the full mac address at the end of the paylod
           var fullMac = msg.payload.slice(msg.payload.length-6,msg.payload.length);
 
@@ -92,46 +113,70 @@ var server = net.createServer(function(socket) {
               gHomaRegistry[idx] = ghoma;
             } else {
               // a new never seen plug
-              log('INFO','REG');
+              // the last three bytes contain the firmware version
+              const major = msg.payload[msg.payload.length-3];
+              const minor = msg.payload[msg.payload.length-2];
+              const build = msg.payload[msg.payload.length-1];
+
+              ghoma.firmware = ''+major+'.'+minor+'.'+build;
+              log('INFO','REGISTER', ghoma.id+' firmware '+ghoma.firmware);
               gHomaRegistry.push(ghoma);
             }
 
             // notify listener about the new plug
             if( exports.onNew ) {
-              exports.onNew(ghoma);
+              exports.onNew( filterPlug(ghoma) );
             }
 
           }
         } else if( msg.command.equals( CMD_STATUS ) ) {
           log('HANDLE', 'STATUS', msg.payload);
-
-          var newstate = 'unknown';
-          if( msg.payload[msg.payload.length-1] == 0xff ) {
-            newstate = 'on'
-          } else if( msg.payload[msg.payload.length-1] == 0x00 ) {
-            newstate = 'off'
-          } else {
-            log('HANDLE', 'STATUS', 'Status unknown: ' +  msg.payload[msg.payload.length-1]);
-          }
-          if( newstate!=ghoma.state && newstate != 'unknown') {
-            ghoma.prevstate = ghoma.state;
-            ghoma.state = newstate;
-            ghoma.statechanged = new Date();
-            if( msg.payload[12] == 0x81 ) {
-              ghoma.triggered = 'local';
-            }else if( msg.payload[12] == 0x11 ) {
-              ghoma.triggered = 'remote';
-            } else {
-              ghoma.triggered = 'unknown';
+          if( msg.payload.slice(9, 9+CMD_MEASURE.length).equals(CMD_MEASURE) ) {
+            // Energy measurement
+            const etype = msg.payload[msg.payload.length - 5];
+            const propertyName = resolveEnergyTypeName(etype);
+            const factor = (propertyName==='energy' ? 1000 : 100);
+            ghoma.energy = ghoma.energy || {};
+            ghoma.energy[propertyName] = ghoma.energy[propertyName] || {};
+            ghoma.energy[propertyName].prevvalue = ghoma.energy[propertyName].value;
+            ghoma.energy[propertyName].value = readUInt24(msg.payload, msg.payload.length - 3) / factor;
+						ghoma.energy[propertyName].count = ghoma.energy[propertyName].count || 0;
+            ghoma.energy[propertyName].count++;
+            ghoma.energy[propertyName].update = new Date();
+            log('HANDLE','MEASURE', propertyName+'='+ghoma.energy[propertyName].value);
+            if( exports.onMeasurement ) {
+              exports.onMeasurement(filterPlug(ghoma), propertyName);
             }
-            if( exports.onStatusChange ) {
-              exports.onStatusChange(ghoma);
+          } else {
+            // Switch
+            var newstate = 'unknown';
+            if( msg.payload[msg.payload.length-1] == 0xff ) {
+              newstate = 'on'
+            } else if( msg.payload[msg.payload.length-1] == 0x00 ) {
+              newstate = 'off'
+            } else {
+              log('HANDLE', 'STATUS', 'Status unknown: ' +  msg.payload[msg.payload.length-1]);
+            }
+            if( newstate!=ghoma.state && newstate != 'unknown') {
+              ghoma.prevstate = ghoma.state;
+              ghoma.state = newstate;
+              ghoma.statechanged = new Date();
+              if( msg.payload[12] == 0x81 ) {
+                ghoma.triggered = 'local';
+              }else if( msg.payload[12] == 0x11 ) {
+                ghoma.triggered = 'remote';
+              } else {
+                ghoma.triggered = 'unknown';
+              }
+              if( exports.onStatusChange ) {
+                exports.onStatusChange(filterPlug(ghoma));
+              }
             }
           }
         } else if( msg.command.equals( CMD_HEARTBEAT ) ) {
           ghoma.lastheartbeat = new Date();
           if( exports.onHeartbeat ) {
-            exports.onHeartbeat(ghoma);
+            exports.onHeartbeat(filterPlug(ghoma));
           }
           send('HEARTBEAT RPLY', BuildMsg(HEARTBEATREPLY));
         } else {
@@ -255,29 +300,53 @@ var server = net.createServer(function(socket) {
 // Local helper functions
 //
 
-pad = function (pad, msg) { return (pad + msg).slice(-pad.length); }
+const pad = function(pad, msg) { return (pad + msg).slice(-pad.length); }
 
-log = function(action, msg) {
+const log = function(action, msg) {
   if( exports.log ) {
-    exports.log(pad(action_padding,'GHOMA')+' ['+pad(msg_padding,action)+'] '+msg);
+    exports.log(pad(action_padding,'GHOMA')+' ['+pad(msg_padding, action)+'] '+msg);
   }
 }
 
-// Get plug by id
-indexOfById = function(id) {
+/**
+ * Read 3 bytes aka 24 bit from a buffer and return as int.
+ * 
+ * @param {*} buf 
+ * @param {*} offset 
+ */
+const readUInt24 = (buf, offset) => {
+  let ret = 0;
+	for (let i = 0; i < 3; i++) {
+		ret <<= 8;
+		ret += buf[i + offset];
+	}
+	return ret;
+}
+
+/** 
+ * Get plug index by id.
+ * 
+ * @param id The plug id. (shotmac)
+ */
+ const indexOfById = function(id) {
   var fid = -1;
   gHomaRegistry.forEach( function(ghoma,idx) {
-    if( ghoma.id==id) {
+    if( ghoma.id==id ) {
       fid = idx;
     }
   });
   return fid;
 }
 
-// Return not the complete plug object
-filterPlug = function(plug) {
+/**
+ * Creates the filtered plug object.
+ * 
+ * @param plug The unfiltered plug object.
+ */ 
+const filterPlug = function(plug) {
   return {
     id : plug.id,
+    firmware : plug.firmware,
     state : plug.state,
     statechanged: plug.statechanged,
     triggered: plug.triggered,
@@ -288,7 +357,8 @@ filterPlug = function(plug) {
     on : plug.on,
     off : plug.off,
     reregistered : plug.reregistered,
-    heartbeat: plug.lastheartbeat
+    heartbeat: plug.lastheartbeat,
+    energy : plug.energy
   }
 }
 

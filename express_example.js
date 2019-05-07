@@ -19,7 +19,7 @@ var express = require('express');
 var app = express();
 
 // Uncomment this line to get a detailed log output
-//ghoma.log=console.log;
+ghoma.log=console.log;
 
 var httpPort = 3000;    // Express http listening port
 var ghomaPort = 4196;   // G-Homa default port

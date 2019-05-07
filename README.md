@@ -34,6 +34,11 @@ ghoma.onStatusChange = function(plug) {
   console.log('New state of ' + plug.remoteAddress+' is '+plug.state+' triggered '+plug.triggered);
 }
 
+// Called when a enery measurement value was reported
+ghoma.onMeasurement = function(plug, property) {
+  console.log('Measured '+property+' at '+plug.remoteAddress+'. Value is '+plug.energy[property].value);
+}
+
 // Called when the plug connection to the server was lost
 ghoma.onClose = function(plug) {
   console.log('Closed ' + plug.remoteAddress);
@@ -76,6 +81,9 @@ Called when a new plug is registered with the control server.
 #### onStatusChange(plug)
 Called if the plug was switched on or off.
 
+#### onMeasurement(plug, property)
+Called if the plug has provided a new energy measurement. Only available for plugs with this capability. Property is the name of the measured energy velue.
+
 #### onClose(plug)
 Called if the connection to the plug was lost.
 
@@ -106,18 +114,48 @@ The plug object is used as callback argument for each notification and as a resu
 
 ```js
 {
-  "id": "53ae11", // Unique ID of the plug. These are the last 3 bytes from the MAC address.
-  "state": "on",  // Current state. May be 'on','off' or 'unknown'
-  "statechanged": "2017-01-22T21:00:19.733Z", // Time of the last state change
-  "triggered": "local",  // local: Triggered by switch on the plug. remote: Triggered by control server
-  "prevstate": "off",   // The previous state. May be 'unkown', if the plug has no state send until now
-  "initalized": "2017-01-22T20:59:23.565Z", // Time the plug has registered with the control server
-  "remoteAddress": "::ffff:192.168.1.136", // The address of the plug
-  "remotePort": 14283, // The remote port
-  "heartbeat": "2017-01-22T21:00:20.893Z",  // Time of the last heartbeat call from the plug
-  "reregistered" : 2 // Number of re registrations of the plug. May be a indicator for the connection stability
+  id: "53ae11", // Unique ID of the plug. These are the last 3 bytes from the MAC address.
+  firmware : "2.18.6"  // Plug firmware version
+  state: "on",  // Current state. May be 'on','off' or 'unknown'
+  statechanged: "2017-01-22T21:00:19.733Z", // Time of the last state change
+  triggered: "local",  // local: Triggered by switch on the plug. remote: Triggered by control server
+  prevstate: "off",   // The previous state. May be 'unkown', if the plug has no state send until now
+  initalized: "2017-01-22T20:59:23.565Z", // Time the plug has registered with the control server
+  remoteAddress: "::ffff:192.168.1.136", // The address of the plug
+  remotePort: 14283, // The remote port
+  heartbeat: "2017-01-22T21:00:20.893Z",  // Time of the last heartbeat call from the plug
+  reregistered : 2, // Number of re registrations of the plug. May be a indicator for the connection stability
+  on : // Function to switch the plug on
+  off :  // Function to switch the plug off
+  energy : {}  // Provided when using plugs with energy measurement funtionality (see below)
 }
 ```
+
+For plugs that provide energy measurement functionality (EMW302WF-CTL) there is also a energy object available, like :
+```js
+{
+  energy: {
+    voltage: {
+      value: 220.1     // Current value
+      prevvalue: 220.5 // Previous reported value
+      count: 3         // Number of reportings
+      update : "2017-01-22T21:02:21.591Z",  // Time of the last report for this value
+    } 
+    ...
+  }
+}
+```
+These measurement properties are provided.
+
+| Name           | Description                                   |
+|----------------|-----------------------------------------------|
+| voltage        | Net voltage                                   |
+| current        | Current                                       |
+| frequency      | Net frequency                                 |
+| cosphi         | Power factor                                  | 
+| energy         | Enery usage in kWh added up                   |
+| power          | Power value                                   |
+| maxpower       | Maximum power                                 |
 
 G-Homa installation
 -------------------
@@ -133,6 +171,10 @@ Note: If you re-configure the plug to use the new control server, the android or
 
 Change log
 ----------
+* Version 1.1.0
+  - Support for energy measurements. Inspired by the fhem module implementation.
+  - Plug object contains the firmware version.
+  
 * Version 1.0.7 (thx to msteiger)
   - Typo fix: t(r)iggered. This may break current listeners that use this property.
   - Enhancement : express example return a plain state endpoint. The info endpoint returns all informations.
